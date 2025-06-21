@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>  
   <title>DODO Flash Loan Arbitrage</title>
   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
-  <script src="https://unpkg.com/@walletconnect/web3-provider@1.8.0/dist/umd/index.min.js"></script>
   <style>
     body { background-color: #0a0; color: white; font-family: sans-serif; padding: 20px; }
     table { border-collapse: collapse; width: 100%; margin-top: 20px; }
@@ -269,22 +268,20 @@
 
     document.getElementById("connectWallet").onclick = async () => {
       try {
-        const walletConnectProvider = new WalletConnectProvider.default({
-          rpc: {
-            137: "https://polygon-rpc.com"
-          },
-          chainId: 137
-        });
+        if (typeof window.ethereum === 'undefined') {
+          log("❌ MetaMask not found. Please install MetaMask.");
+          return;
+        }
 
-        await walletConnectProvider.enable();
-        provider = new ethers.providers.Web3Provider(walletConnectProvider);
+        await window.ethereum.request({ method: "eth_requestAccounts" });
+        provider = new ethers.providers.Web3Provider(window.ethereum);
         signer = provider.getSigner();
         walletAddress = await signer.getAddress();
 
         contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
 
         document.getElementById("wallet").textContent = walletAddress;
-        log("✅ WalletConnect connected");
+        log("✅ Connected to MetaMask");
 
         updateBalances();
       } catch (err) {
@@ -317,7 +314,7 @@
       return (await usdc.balanceOf(CONTRACT_ADDRESS)) / 1e6;
     }
 
-    // Your executeTrade remains unchanged and fully functional
+    // Your executeTrade and arbitrage logic remains unchanged.
   </script>
 </body>
 </html>
